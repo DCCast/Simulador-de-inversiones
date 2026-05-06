@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Inversión — Costa Rica</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f3;color:#1a1a18;line-height:1.6;min-height:100vh}
+.page{max-width:980px;margin:0 auto;padding:1.25rem 1rem 3rem}
+.hdr{background:#fff;border-radius:16px;padding:1.5rem 2rem;margin-bottom:1.25rem;border:1px solid #e8e8e6;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.hdr h1{font-size:20px;font-weight:700;margin-bottom:2px}
+.hdr p{font-size:12px;color:#888}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:11px;background:#f0f0ee;padding:3px 10px;border-radius:20px;color:#555}
+.tabs{display:flex;gap:8px;margin-bottom:1.25rem}
+.tab{padding:9px 22px;border-radius:20px;border:1.5px solid #ddd;font-size:13px;cursor:pointer;background:#fff;color:#666;transition:all .15s;font-weight:500}
+.tab.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.section{display:none}.section.active{display:block}
+.box{background:#fff;border-radius:14px;padding:1.25rem 1.5rem;border:1px solid #e8e8e6;margin-bottom:1rem}
+.hero{background:#1a1a18;color:#fff;border-radius:16px;padding:1.75rem 2rem;margin-bottom:1rem}
+.hero h2{color:#fff;font-size:18px;font-weight:700;margin-bottom:3px}
+.hero .sub{font-size:12px;color:#999;margin-bottom:1.25rem}
+.ci{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem}
+.cf{display:flex;flex-direction:column;gap:5px}
+.cf label{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.pf{position:relative}
+.pfx{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#aaa;font-size:13px;pointer-events:none}
+.pf input{padding-left:24px}
+.cf input,.cf select{background:#252523;border:1px solid #3a3a38;border-radius:10px;padding:10px 12px;font-size:15px;color:#fff;outline:none;width:100%;transition:border .15s}
+.cf input:focus,.cf select:focus{border-color:#1D9E75}
+.cf select option{background:#252523}
+.rate-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid #2e2e2c}
+.rate-lbl{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;font-weight:600;white-space:nowrap}
+.rate-row input[type=range]{flex:1;min-width:100px;accent-color:#1D9E75;cursor:pointer}
+.rate-val{font-size:22px;font-weight:700;color:#1D9E75;min-width:58px;text-align:right}
+.sbar{background:#fff;border-radius:14px;padding:1rem 1.5rem;margin-bottom:1rem;border:1px solid #e8e8e6}
+.sbar-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.bar-track{height:10px;background:#f0f0ee;border-radius:100px;margin:6px 0;overflow:hidden;display:flex}
+.bseg{height:100%;transition:width .4s}
+.bar-leg{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:#666}
+.bli{display:flex;align-items:center;gap:5px}
+.bld{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.aok{background:#E1F5EE;border-radius:8px;padding:7px 12px;font-size:12px;color:#0F6E56;margin-top:8px}
+.awk{background:#FAEEDA;border-radius:8px;padding:7px 12px;font-size:12px;color:#633806;margin-top:8px}
+.ainf{background:#E6F1FB;border-radius:8px;padding:7px 12px;font-size:12px;color:#185FA5;margin-top:8px}
+.acr{background:#FCEBEB;border-radius:8px;padding:7px 12px;font-size:12px;color:#A32D2D;margin-top:8px}
+.rc3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1rem}
+@media(max-width:520px){.rc3{grid-template-columns:1fr}}
+.rc{background:#fff;border-radius:14px;padding:1.25rem;border:1px solid #e8e8e6}
+.rc.star{border:2px solid #1D9E75}
+.rc .rl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;color:#888}
+.rc .rv{font-size:22px;font-weight:700;margin-bottom:2px}
+.rc .rs{font-size:11px;color:#888}
+.fund-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:1rem;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.fund-scroll::-webkit-scrollbar{height:4px}.fund-scroll::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px}
+.fc-all{flex:0 0 auto;width:148px;border-radius:12px;padding:.9rem 1rem;border:2px solid #e8e8e6;background:#fff;cursor:pointer;transition:all .2s}
+.fc-all:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.fc-all.on{border-color:#1a1a18;background:#1a1a18;color:#fff}
+.fa-t{font-size:13px;font-weight:700;margin-bottom:3px}
+.fa-s{font-size:11px;margin-bottom:8px;opacity:.6}
+.fa-dots{display:flex;gap:4px}
+.fa-d{width:9px;height:9px;border-radius:50%}
+.fc{flex:0 0 auto;width:158px;border-radius:12px;padding:.9rem 1rem;border:2px solid #e8e8e6;background:#fff;cursor:pointer;transition:all .2s;position:relative}
+.fc:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.fc.on{background:#fafffe}
+.fc-bk{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.fc-nm{font-size:10px;color:#888;margin-bottom:7px}
+.fc-rt{font-size:22px;font-weight:700;margin-bottom:3px}
+.fc-pr{font-size:11px;color:#555}
+.fc-ri{position:absolute;top:7px;right:7px;font-size:9px;padding:2px 6px;border-radius:20px;font-weight:700}
+.ch-sec{background:#fff;border-radius:14px;padding:1.25rem 1.5rem;border:1px solid #e8e8e6;margin-bottom:1rem}
+.ch-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.ch-title{font-size:15px;font-weight:600}
+.ch-sub{font-size:12px;color:#888;margin-top:2px}
+.ch-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.toggle-g{display:flex;border:1.5px solid #e8e8e6;border-radius:20px;overflow:hidden}
+.tgb{padding:5px 14px;font-size:12px;cursor:pointer;background:#fff;color:#666;border:none;font-weight:500;transition:all .15s;white-space:nowrap}
+.tgb.on{background:#1a1a18;color:#fff}
+.rate-badge{background:#f0f0ee;border-radius:10px;padding:5px 12px;font-size:12px;font-weight:600;color:#1a1a18;transition:opacity .2s}
+.leg{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px;font-size:12px;color:#555}
+.li{display:flex;align-items:center;gap:5px}
+.chart-wrap{position:relative;height:280px}
+canvas{display:block;width:100%!important}
+.tt{position:absolute;background:rgba(12,12,12,.96);color:#fff;border-radius:10px;padding:12px 14px;font-size:12px;pointer-events:none;white-space:nowrap;display:none;z-index:99;line-height:1.75;min-width:210px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.bank-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.bb{padding:5px 14px;border-radius:20px;border:1.5px solid #ddd;background:#f5f5f3;font-size:12px;cursor:pointer;font-weight:600;transition:all .15s}
+.bba{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 12px;text-align:left;border-bottom:.5px solid #f0f0ee}
+th{font-weight:600;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.3px}
+.note{font-size:11px;color:#aaa;margin-top:8px;line-height:1.6}
+.disclaimer{background:#f0f0ee;border-radius:12px;padding:1rem 1.25rem;font-size:12px;color:#666;line-height:1.7;margin-top:.5rem}
+.bk-hdr{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+.bk-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.bk-nm{font-size:17px;font-weight:700}
+.bk-sb{font-size:12px;color:#888}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:600px){.cols2{grid-template-columns:1fr}}
+.pros{background:#E1F5EE;border-radius:10px;padding:1rem}
+.cons{background:#FCEBEB;border-radius:10px;padding:1rem}
+.pros h4{color:#085041;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.cons h4{color:#A32D2D;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.pi{font-size:13px;color:#0F6E56;padding:3px 0;line-height:1.5}
+.ci-item{font-size:13px;color:#A32D2D;padding:3px 0;line-height:1.5}
+.verd{border-radius:10px;padding:1rem 1.25rem;margin-top:12px;font-size:13px;line-height:1.7}
+.stars{font-size:16px;margin-bottom:5px}
+.fd{background:#f5f5f3;border-radius:10px;padding:.75rem 1rem;margin-bottom:10px}
+.fdr{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:.5px solid #e8e8e6}
+.fdr:last-child{border-bottom:none}
+.fdl{color:#666}.fdv{font-weight:600}
+.ftag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:6px}
+.footer{text-align:center;font-size:11px;color:#aaa;padding:2rem 1rem 1rem;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="hdr">
+  <div><h1>Simulador de Inversión — Costa Rica</h1><p>Fondos reales regulados por SUGEVAL · Datos 2025–2026 · Sin internet requerido</p></div>
+  <div class="chips"><span class="chip">BN · BAC · BCR · Popular · Merc. de Valores</span><span class="chip">SUGEVAL</span></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('sim')">Simulador de inversión</div>
+  <div class="tab" onclick="showTab('ana')">Análisis por banco</div>
+</div>
+
+<div id="tab-sim" class="section active">
+  <div class="hero">
+    <h2>Simulador de inversión</h2>
+    <div class="sub">Ingresá tus datos en dólares y comparás cada banco en tiempo real</div>
+    <div class="ci">
+      <div class="cf"><label>Salario neto mensual</label><div class="pf"><span class="pfx">$</span><input type="number" id="sal" value="943" min="0" step="10" oninput="run()"></div></div>
+      <div class="cf"><label>Monto inicial de inversión</label><div class="pf"><span class="pfx">$</span><input type="number" id="ini" value="500" min="0" step="50" oninput="run()"></div></div>
+      <div class="cf"><label>Frecuencia de contribución</label>
+        <select id="freq" onchange="run()">
+          <option value="52">Semanal</option><option value="12" selected>Mensual</option>
+          <option value="4">Trimestral</option><option value="2">Semestral</option><option value="1">Anual</option>
+        </select>
+      </div>
+      <div class="cf"><label>Monto de contribución</label><div class="pf"><span class="pfx">$</span><input type="number" id="contrib" value="100" min="0" step="10" oninput="run()"></div></div>
+      <div class="cf"><label>Horizonte de inversión</label>
+        <select id="hor" onchange="run()">
+          <option value="5">5 años</option><option value="10">10 años</option><option value="15">15 años</option>
+          <option value="20">20 años</option><option value="25" selected>25 años</option><option value="30">30 años</option>
+        </select>
+      </div>
+    </div>
+    <div class="rate-row">
+      <span class="rate-lbl">Tasa de rendimiento esperado</span>
+      <input type="range" id="rateSlider" min="1" max="25" step="0.5" value="10.5" oninput="syncRate()">
+      <div class="rate-val" id="rateVal">10.5%</div>
+    </div>
+    <div style="font-size:11px;color:#555;margin-top:6px">Mínimo 1% — usá esta tasa para ver tu retorno esperado. El gráfico muestra cada banco con su tasa real histórica.</div>
+  </div>
+
+  <div class="sbar">
+    <div class="sbar-h"><span style="font-size:13px;font-weight:600">Distribución de tu salario mensual</span><span style="font-size:12px;color:#888" id="sal-info"></span></div>
+    <div class="bar-track"><div class="bseg" id="b-inv" style="background:#1D9E75"></div><div class="bseg" id="b-rem" style="background:#e8e8e6"></div></div>
+    <div class="bar-leg">
+      <span class="bli"><span class="bld" style="background:#1D9E75"></span><span id="l-inv"></span></span>
+      <span class="bli"><span class="bld" style="background:#ccc"></span><span id="l-rem"></span></span>
+    </div>
+    <div id="alert-box"></div>
+  </div>
+
+  <div class="rc3">
+    <div class="rc"><div class="rl">Total aportado</div><div class="rv" id="r-total">$0</div><div class="rs" id="r-total-sub"></div></div>
+    <div class="rc star"><div class="rl" style="color:#1D9E75">Valor final proyectado</div><div class="rv" style="color:#1D9E75" id="r-final">$0</div><div class="rs" id="r-rate-sub"></div></div>
+    <div class="rc"><div class="rl">ROI esperado</div><div class="rv" id="r-roi" style="color:#1D9E75">0%</div><div class="rs" id="r-gain"></div></div>
+  </div>
+
+  <div style="font-size:13px;font-weight:700;margin-bottom:6px">Fondos recomendados por banco — tasas reales 2025–2026</div>
+  <div style="font-size:12px;color:#888;margin-bottom:10px">Seleccioná un banco para ver su gráfico individual · "Consolidado" muestra todos a la vez</div>
+  <div class="fund-scroll" id="fund-cards"></div>
+
+  <div class="ch-sec">
+    <div class="ch-top">
+      <div><div class="ch-title" id="ch-title">Crecimiento de tu inversión — Todos los bancos</div><div class="ch-sub" id="ch-sub">Usando tus parámetros con la tasa real de cada fondo</div></div>
+      <div class="ch-right">
+        <div class="toggle-g">
+          <button class="tgb on" id="tg-real" onclick="setToggle(false)">Tasas reales por fondo</button>
+          <button class="tgb" id="tg-custom" onclick="setToggle(true)">Mi tasa personalizada</button>
+        </div>
+        <div class="rate-badge" id="custom-rate-badge">Tu tasa: 10.5%</div>
+      </div>
+    </div>
+    <div class="leg" id="chart-legend"></div>
+    <div class="chart-wrap"><canvas id="ch1"></canvas><div class="tt" id="tt1"></div></div>
+  </div>
+
+  <div class="box">
+    <div style="font-size:15px;font-weight:600;margin-bottom:4px">Tabla año a año — números reales</div>
+    <div style="font-size:12px;color:#888;margin-bottom:12px">Filtrá por banco · Columnas: capital aportado, balance proyectado e intereses ganados</div>
+    <div class="bank-btns" id="bank-filter-btns"></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr>
+        <th>Año</th>
+        <th style="text-align:right">Aportado ese año</th>
+        <th style="text-align:right">Capital acumulado</th>
+        <th style="text-align:right" id="tbl-col-header">Balance</th>
+        <th style="text-align:right;color:#1D9E75">Intereses ganados</th>
+      </tr></thead>
+      <tbody id="tbl-body"></tbody>
+    </table></div>
+    <p class="note">* Proyección con interés compuesto anual. Rendimientos pasados no garantizan rendimientos futuros. Consultá el prospecto de cada fondo antes de invertir.</p>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠️ Aviso importante:</strong> Este simulador es únicamente informativo y educativo. No constituye asesoría financiera certificada. Las tasas mostradas corresponden a rendimientos históricos o recientes de cada fondo y <strong>no garantizan rendimientos futuros</strong>. Las tasas de BCT (14%) y BAC (12%) son estimados conservadores — el rendimiento real puede ser mayor o menor. Los fondos de inversión pueden tener pérdidas temporales o permanentes. Antes de invertir, solicitá el prospecto completo a la SAFI correspondiente y consultá un asesor regulado por <strong>SUGEVAL</strong>.
+  </div>
+</div>
+
+<div id="tab-ana" class="section">
+  <div class="box">
+    <div class="bk-hdr"><div class="bk-dot" style="background:#1D9E75"></div><div><div class="bk-nm">Banco Nacional — BN Fondos</div><div class="bk-sb">18 fondos · Más innovadora del mercado · Desde 1998</div></div></div>
+    <div class="fd">
+      <div class="fdr"><span class="fdl">Fondo estrella</span><span class="fdv">BN ETF500<span class="ftag" style="background:#E1F5EE;color:#0F6E56">RECOMENDADO</span></span></div>
+      <div class="fdr"><span class="fdl">Tipo</span><span class="fdv">Crecimiento — replica índice S&P 500</span></div>
+      <div class="fdr"><span class="fdl">Rendimiento no anualizado (jul 2025)</span><span class="fdv">7.9% en primeros 5 meses de operación</span></div>
+      <div class="fdr"><span class="fdl">Tasa histórica S&P 500 (25 años)</span><span class="fdv">~10–11% anual</span></div>
+      <div class="fdr"><span class="fdl">Correlación con índice real</span><span class="fdv">0.993 — casi espejo del S&P 500</span></div>
+      <div class="fdr"><span class="fdl">Inversión mínima</span><span class="fdv">$100 inicial / $1 en aportes sucesivos</span></div>
+      <div class="fdr"><span class="fdl">Comisión de salida</span><span class="fdv">Ninguna</span></div>
+      <div class="fdr"><span class="fdl">Acceso</span><span class="fdv">BN Móvil y Banca en Línea — 100% digital</span></div>
+      <div class="fdr"><span class="fdl">Otros fondos</span><span class="fdv">FonDepósito (~4.5%), ETF Bitcoin (alto riesgo)</span></div>
+    </div>
+    <div class="cols2">
+      <div class="pros"><h4>✓ Lo bueno</h4>
+        <div class="pi">Primero en CR y Centroamérica en ofrecer acceso al S&P 500</div>
+        <div class="pi">Mínimo de $100 — el más accesible del mercado</div>
+        <div class="pi">Sin comisión de salida — liquidez real en 2–5 días</div>
+        <div class="pi">100% digital desde BN Móvil sin ir a oficina</div>
+        <div class="pi">Correlación 0.993 con el S&P 500 — muy fiel al índice</div>
+        <div class="pi">Respaldo del Estado costarricense</div>
+      </div>
+      <div class="cons"><h4>✗ Lo malo</h4>
+        <div class="ci-item">ETF500 lanzado en feb 2025 — sin historial propio largo en CR</div>
+        <div class="ci-item">S&P 500 es volátil — puede caer fuerte en crisis de mercado</div>
+        <div class="ci-item">FonDepósito puede rendir menos que CDPs en algunos períodos</div>
+        <div class="ci-item">ETF Bitcoin: riesgo extremo, solo para inversionistas experimentados</div>
+      </div>
+    </div>
+    <div class="verd" style="background:#E1F5EE;border-left:3px solid #1D9E75;border-radius:0 10px 10px 0">
+      <div class="stars">⭐⭐⭐⭐⭐</div>
+      <strong>Veredicto: Mejor opción para el inversionista costarricense promedio.</strong> El BN ETF500 democratiza el acceso a mercados globales con la menor barrera del país. Para perfiles jóvenes con horizonte largo, es el punto de partida ideal. La comunidad financiera costarricense lo señala como el producto más revolucionario de 2025.
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="bk-hdr"><div class="bk-dot" style="background:#3266ad"></div><div><div class="bk-nm">BAC Credomatic — BAC SAFI</div><div class="bk-sb">7 fondos · Activos: ₡270,799 millones</div></div></div>
+    <div class="fd">
+      <div class="fdr"><span class="fdl">Fondo estrella</span><span class="fdv">BAC Millennium<span class="ftag" style="background:#E6F1FB;color:#185FA5">MEJOR GESTIÓN ACTIVA</span></span></div>
+      <div class="fdr"><span class="fdl">Tipo</span><span class="fdv">Crecimiento — mercado local e internacional</span></div>
+      <div class="fdr"><span class="fdl">Rendimiento</span><span class="fdv">#1 fondo de crecimiento en CR a ene 2025 (~14–16%)</span></div>
+      <div class="fdr"><span class="fdl">Tasa estimada conservadora largo plazo</span><span class="fdv">~12% anual</span></div>
+      <div class="fdr"><span class="fdl">Comisión máxima</span><span class="fdv">4% — la más alta del mercado analizado</span></div>
+      <div class="fdr"><span class="fdl">Otros fondos</span><span class="fdv">Propósito (ingreso CRC ~5.5%), Impulso (money market)</span></div>
+    </div>
+    <div class="cols2">
+      <div class="pros"><h4>✓ Lo bueno</h4>
+        <div class="pi">Millennium fue el fondo de crecimiento #1 en CR (enero 2025)</div>
+        <div class="pi">Gestión activa — selección estratégica de activos</div>
+        <div class="pi">Diversificación: local + internacional, CRC + USD</div>
+        <div class="pi">Portal digital con visibilidad diaria del saldo</div>
+        <div class="pi">Distribución mensual automática en fondos de ingreso</div>
+      </div>
+      <div class="cons"><h4>✗ Lo malo</h4>
+        <div class="ci-item">Fondo cerrado USD requiere mínimo $50,000 — muy excluyente</div>
+        <div class="ci-item">Comisión hasta 4% — erosiona rendimientos a largo plazo</div>
+        <div class="ci-item">Millennium no distribuye rendimientos periódicos</div>
+        <div class="ci-item">Gestión activa no garantiza superar índices siempre</div>
+      </div>
+    </div>
+    <div class="verd" style="background:#E6F1FB;border-left:3px solid #3266ad;border-radius:0 10px 10px 0">
+      <div class="stars">⭐⭐⭐⭐½</div>
+      <strong>Veredicto: Mejor fondo de crecimiento gestionado activamente en CR.</strong> El Millennium lidera los rankings de crecimiento en SUGEVAL. Cuidado con la comisión del 4% y los mínimos altos en algunos productos. Ideal para complementar el BN ETF500 con gestión activa.
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="bk-hdr"><div class="bk-dot" style="background:#E89C2E"></div><div><div class="bk-nm">Banco de Costa Rica — BCR SAFI</div><div class="bk-sb">13 fondos · Activos: CRC 683,455 millones · Desde 1999</div></div></div>
+    <div class="fd">
+      <div class="fdr"><span class="fdl">Fondo estrella</span><span class="fdv">BCR Fondo Inmobiliario Progreso</span></div>
+      <div class="fdr"><span class="fdl">Tipo</span><span class="fdv">Inmobiliario — activos de renta en bienes raíces</span></div>
+      <div class="fdr"><span class="fdl">Rendimiento estimado</span><span class="fdv">~6–8% anual histórico</span></div>
+      <div class="fdr"><span class="fdl">BCR Portafolio Colones</span><span class="fdv">2.33% a sep 2025 — muy conservador</span></div>
+      <div class="fdr"><span class="fdl">Calificación</span><span class="fdv">AAf.cr (Moody's Local) en fondos monetarios</span></div>
+    </div>
+    <div class="cols2">
+      <div class="pros"><h4>✓ Lo bueno</h4>
+        <div class="pi">Mayor cantidad de activos administrados en Costa Rica</div>
+        <div class="pi">Mayor variedad: 13 fondos para todos los perfiles</div>
+        <div class="pi">Respaldo estatal sólido — Banco de Costa Rica</div>
+        <div class="pi">Calificación AAf.cr en fondos monetarios (Moody's Local)</div>
+        <div class="pi">26 años de experiencia operativa ininterrumpida</div>
+      </div>
+      <div class="cons"><h4>✗ Lo malo</h4>
+        <div class="ci-item">Portafolio Colones a 2.33% — de los rendimientos más bajos</div>
+        <div class="ci-item">Fondos inmobiliarios con retiros masivos y controversias en 2025</div>
+        <div class="ci-item">Activos del Portafolio Colones cayeron 22.38% en dic 2025</div>
+        <div class="ci-item">Sin exposición a mercados internacionales en mayoría de fondos</div>
+      </div>
+    </div>
+    <div class="verd" style="background:#FAEEDA;border-left:3px solid #E89C2E;border-radius:0 10px 10px 0">
+      <div class="stars">⭐⭐⭐</div>
+      <strong>Veredicto: Buena variedad, pero los fondos estrella decepcionan.</strong> El Portafolio Colones al 2.33% rinde muy poco. Los fondos inmobiliarios tienen mejor retorno pero enfrentaron controversias en 2025. Confiable para capital conservador de corto plazo, pero no para crecimiento patrimonial.
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="bk-hdr"><div class="bk-dot" style="background:#D85A30"></div><div><div class="bk-nm">Banco Popular — Popular SAFI</div><div class="bk-sb">Subsidiaria 100% del BPDC · Fondos principalmente en colones</div></div></div>
+    <div class="fd">
+      <div class="fdr"><span class="fdl">Fondo estrella</span><span class="fdv">Fondo Confianza BP<span class="ftag" style="background:#FAEEDA;color:#854F0B">MEJOR MONEY MARKET CR</span></span></div>
+      <div class="fdr"><span class="fdl">Rendimiento</span><span class="fdv">~2.77–4.5% anual — fue #1 en colones oct 2022</span></div>
+      <div class="fdr"><span class="fdl">Tipo</span><span class="fdv">Mercado de dinero en colones — alta liquidez</span></div>
+      <div class="fdr"><span class="fdl">Otros fondos</span><span class="fdv">Liquidez Mixto (~3.5%), Popular Mercado Dinero (~2.5%)</span></div>
+    </div>
+    <div class="cols2">
+      <div class="pros"><h4>✓ Lo bueno</h4>
+        <div class="pi">Históricamente el mejor money market en colones de CR</div>
+        <div class="pi">Respaldo del Banco Popular (banco estatal BPDC)</div>
+        <div class="pi">Alta liquidez — ideal para fondo de emergencia en CRC</div>
+        <div class="pi">3 fondos entre los top 10 del mercado en colones</div>
+      </div>
+      <div class="cons"><h4>✗ Lo malo</h4>
+        <div class="ci-item">Sin exposición internacional ni a renta variable</div>
+        <div class="ci-item">Rendimiento bajo vs inflación histórica de CR (~4–5%)</div>
+        <div class="ci-item">Solo fondos money market e ingreso en colones</div>
+        <div class="ci-item">No adecuado para crecimiento patrimonial a largo plazo</div>
+      </div>
+    </div>
+    <div class="verd" style="background:#FAEEDA;border-left:3px solid #D85A30;border-radius:0 10px 10px 0">
+      <div class="stars">⭐⭐⭐½</div>
+      <strong>Veredicto: Mejor para ahorros en colones de corto plazo.</strong> El Confianza BP lidera el mercado de dinero en CRC. Excelente para fondo de emergencia, pero no es un vehículo de crecimiento a largo plazo.
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="bk-hdr"><div class="bk-dot" style="background:#8B5CF6"></div><div><div class="bk-nm">Mercado de Valores — BCT SAFI</div><div class="bk-sb">SAFIs privadas reguladas por SUGEVAL · Mayor rendimiento histórico de CR</div></div></div>
+    <div class="fd">
+      <div class="fdr"><span class="fdl">Fondo estrella</span><span class="fdv">BCT Renta Variable USA<span class="ftag" style="background:#EDE9FE;color:#5B21B6">MAYOR RETORNO CR</span></span></div>
+      <div class="fdr"><span class="fdl">Rendimiento (12 meses jul 2025)</span><span class="fdv">~20% — top 2 del mercado costarricense</span></div>
+      <div class="fdr"><span class="fdl">Tasa estimada conservadora (largo plazo)</span><span class="fdv">~14% — estimado prudente para proyecciones</span></div>
+      <div class="fdr"><span class="fdl">Estrategia</span><span class="fdv">Gestión activa — ETFs sectoriales, rotación de activos USA</span></div>
+      <div class="fdr"><span class="fdl">Alternativa similar</span><span class="fdv">Vista Conexión (Acobo SAFI) ~20% — segunda opción</span></div>
+    </div>
+    <div class="cols2">
+      <div class="pros"><h4>✓ Lo bueno</h4>
+        <div class="pi">BCT Renta Variable USA: mayor rendimiento de CR (~20% jul 2025)</div>
+        <div class="pi">Gestión activa real: toma de ganancias, rotación sectorial</div>
+        <div class="pi">Acceso a acciones y ETFs de las mejores empresas del mundo</div>
+        <div class="pi">Supervisado por SUGEVAL — protección regulatoria costarricense</div>
+        <div class="pi">Vista Conexión como segunda alternativa con rendimientos similares</div>
+      </div>
+      <div class="cons"><h4>✗ Lo malo</h4>
+        <div class="ci-item">Muy alta volatilidad — puede caer drásticamente si cae el mercado USA</div>
+        <div class="ci-item">El 20% de 2025 fue excepcional — no es sostenible indefinidamente</div>
+        <div class="ci-item">Requiere conocimiento mínimo del mercado financiero</div>
+        <div class="ci-item">Mínimo ~$1,000 — más alto que BN ETF500</div>
+        <div class="ci-item">SAFI privada — sin respaldo de banco estatal</div>
+      </div>
+    </div>
+    <div class="verd" style="background:#EDE9FE;border-left:3px solid #8B5CF6;border-radius:0 10px 10px 0">
+      <div class="stars">⭐⭐⭐⭐½</div>
+      <strong>Veredicto: Mayor retorno del mercado — para inversionistas con experiencia.</strong> BCT Renta Variable USA es el fondo de mayor potencial de CR pero también el más volátil. El 20% de 2025 fue excepcional — proyectamos 14% como estimado conservador. Para el inversionista promedio, el BN ETF500 es más predecible. Para quien ya tiene fondo de emergencia y capital a largo plazo, este tiene el mayor potencial del país.
+    </div>
+  </div>
+
+  <div class="box">
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px">Resumen comparativo — todos los bancos</div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Banco / Fondo</th><th style="text-align:right">Tasa estimada</th><th style="text-align:right">Riesgo</th><th style="text-align:right">Mínimo</th><th style="text-align:right">Moneda</th><th style="text-align:right">Mejor para</th></tr></thead>
+      <tbody>
+        <tr><td><strong>BCT Renta Variable USA</strong></td><td style="text-align:right;color:#8B5CF6;font-weight:700">~14–20%</td><td style="text-align:right">Muy alto</td><td style="text-align:right">$1,000</td><td style="text-align:right">USD</td><td style="text-align:right">Crecimiento agresivo</td></tr>
+        <tr style="background:#f9f9f7"><td><strong>BAC Millennium</strong></td><td style="text-align:right;color:#3266ad;font-weight:700">~12–16%</td><td style="text-align:right">Alto</td><td style="text-align:right">$500</td><td style="text-align:right">USD/CRC</td><td style="text-align:right">Crecimiento activo</td></tr>
+        <tr><td><strong>BN ETF500</strong></td><td style="text-align:right;color:#1D9E75;font-weight:700">~10.5%</td><td style="text-align:right">Medio-Alto</td><td style="text-align:right">$100</td><td style="text-align:right">USD</td><td style="text-align:right">Mejor accesibilidad</td></tr>
+        <tr style="background:#f9f9f7"><td><strong>BCR Inmobiliario</strong></td><td style="text-align:right;color:#E89C2E;font-weight:700">~7%</td><td style="text-align:right">Medio</td><td style="text-align:right">$1,000</td><td style="text-align:right">USD</td><td style="text-align:right">Renta inmobiliaria</td></tr>
+        <tr><td><strong>Popular Confianza BP</strong></td><td style="text-align:right;color:#D85A30;font-weight:700">~4.5%</td><td style="text-align:right">Bajo</td><td style="text-align:right">₡1M</td><td style="text-align:right">CRC</td><td style="text-align:right">Ahorro corto plazo</td></tr>
+        <tr style="background:#f9f9f7"><td><strong>BN FonDepósito</strong></td><td style="text-align:right;font-weight:700">~4.5%</td><td style="text-align:right">Muy bajo</td><td style="text-align:right">$20</td><td style="text-align:right">USD/CRC</td><td style="text-align:right">Fondo emergencia</td></tr>
+        <tr><td><strong>BCR Portafolio Colones</strong></td><td style="text-align:right;font-weight:700">2.33%</td><td style="text-align:right">Muy bajo</td><td style="text-align:right">₡1M</td><td style="text-align:right">CRC</td><td style="text-align:right">Liquidez inmediata</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note" style="margin-top:10px">Fuentes: SUGEVAL · Informes trimestrales SAFI · El Financiero CR 2025. Rendimientos pasados no garantizan rendimientos futuros.</p>
+  </div>
+</div>
+
+<div class="footer">
+  Datos: SUGEVAL · BN Fondos · BCR SAFI · BAC SAFI · Popular SAFI · BCT SAFI · El Financiero CR · Mayo 2026<br>
+  Documento informativo y educativo. No constituye asesoría financiera certificada. Consultá un asesor regulado por SUGEVAL antes de invertir.
+</div>
+</div>
+
+<script>
+var SEL='all', USE_CUSTOM=false;
+var FUNDS=[
+  {id:'bn', label:'BN', name:'BN ETF500', rate:10.5, color:'#1D9E75', risk:'Medio-Alto', min:'$100'},
+  {id:'bac', label:'BAC', name:'BAC Millennium', rate:12.0, color:'#3266ad', risk:'Alto', min:'$500'},
+  {id:'bcr', label:'BCR', name:'BCR Inmobiliario', rate:7.0, color:'#E89C2E', risk:'Medio', min:'$1,000'},
+  {id:'pop', label:'Popular', name:'Pop. Confianza', rate:4.5, color:'#D85A30', risk:'Bajo', min:'₡1M'},
+  {id:'bct', label:'Merc. Valores', name:'BCT Renta Var.', rate:14.0, color:'#8B5CF6', risk:'Alto', min:'$1,000'}
+];
+var RBKG={'Muy Alto':'background:#EDE9FE;color:#5B21B6','Alto':'background:#E6F1FB;color:#185FA5','Medio-Alto':'background:#E1F5EE;color:#0F6E56','Medio':'background:#FAEEDA;color:#854F0B','Bajo':'background:#f5f5f3;color:#555'};
+
+function fmt(n){return Math.round(n).toLocaleString('es-CR')}
+function fu(n){return '$'+fmt(n)}
+function pc(n){return (Math.round(n*10)/10)+'%'}
+
+function getIn(){
+  var sal=parseFloat(document.getElementById('sal').value)||0;
+  var ini=parseFloat(document.getElementById('ini').value)||0;
+  var freq=parseInt(document.getElementById('freq').value)||12;
+  var contrib=parseFloat(document.getElementById('contrib').value)||0;
+  var hor=parseInt(document.getElementById('hor').value)||25;
+  var rr=parseFloat(document.getElementById('rateSlider').value);
+  var rate=isNaN(rr)?1:Math.max(1,rr);
+  return {sal:sal,ini:ini,freq:freq,contrib:contrib,hor:hor,rate:rate,annC:contrib*freq};
+}
+
+function sim(principal,annRate,years,annC){
+  var r=annRate/100, v=principal, cumC=principal, rows=[];
+  for(var y=1;y<=years;y++){
+    v=(v+annC)*(1+r); cumC+=annC;
+    rows.push({year:y,annC:annC,cumC:Math.round(cumC),val:Math.round(v),int:Math.round(v-cumC)});
+  }
+  return rows;
+}
+
+function run(){
+  var g=getIn();
+  document.getElementById('rateVal').textContent=g.rate+'%';
+  document.getElementById('custom-rate-badge').textContent='Tu tasa: '+g.rate+'%';
+  var mC=g.annC/12, pS=g.sal>0?mC/g.sal*100:0, bw=Math.min(100,Math.max(0,pS));
+  document.getElementById('b-inv').style.width=bw+'%';
+  document.getElementById('b-rem').style.width=(100-bw)+'%';
+  document.getElementById('l-inv').textContent='Contribución equiv./mes: '+fu(mC)+' ('+Math.round(pS)+'%)';
+  document.getElementById('l-rem').textContent='Disponible: '+fu(Math.max(0,g.sal-mC))+' ('+Math.max(0,Math.round(100-pS))+'%)';
+  document.getElementById('sal-info').textContent='Salario: '+fu(g.sal)+'/mes';
+  var al='';
+  if(pS>50)al='<div class="acr">⚠️ Más del 50% del salario en inversión. Asegurate de tener gastos cubiertos y fondo de emergencia primero.</div>';
+  else if(pS>=20)al='<div class="aok">✓ Invertir 20–50% del salario es saludable si tus gastos están cubiertos.</div>';
+  else if(pS>0)al='<div class="ainf">ℹ️ Menos del 20% — el hábito constante es lo más importante al inicio.</div>';
+  document.getElementById('alert-box').innerHTML=al;
+  var s=sim(g.ini,g.rate,g.hor,g.annC);
+  var last=s[s.length-1]||{val:g.ini,cumC:g.ini,int:0};
+  var gain=last.val-last.cumC, roi=last.cumC>0?gain/last.cumC*100:0;
+  document.getElementById('r-total').textContent=fu(last.cumC);
+  document.getElementById('r-total-sub').textContent=fu(g.ini)+' inicial + '+fu(g.annC)+'/año × '+g.hor+'a';
+  document.getElementById('r-final').textContent=fu(last.val);
+  document.getElementById('r-rate-sub').textContent='a tu tasa '+g.rate+'% — '+g.hor+' años';
+  document.getElementById('r-roi').textContent='+'+Math.round(roi)+'%';
+  document.getElementById('r-gain').textContent='Ganancia neta: +'+fu(gain);
+  buildCards(g.ini,g.annC,g.hor,g.rate);
+  buildChart(g.ini,g.annC,g.hor,g.rate);
+  buildTable(g.ini,g.annC,g.hor,g.rate);
+  buildToggle();
+  buildBtns();
+}
+
+function syncRate(){
+  var v=Math.max(1,parseFloat(document.getElementById('rateSlider').value)||1);
+  document.getElementById('rateSlider').value=v;
+  run();
+}
+
+function buildCards(ini,annC,hor,cRate){
+  var h='<div class="fc-all'+(SEL==='all'?' on':'')+'" onclick="selectFund(\'all\')">'
+    +'<div class="fa-t">Consolidado</div><div class="fa-s">Todos los bancos</div>'
+    +'<div class="fa-dots">'+FUNDS.map(function(f){return '<span class="fa-d" style="background:'+f.color+'"></span>'}).join('')+'</div></div>';
+  FUNDS.forEach(function(f){
+    var s=sim(ini,f.rate,hor,annC), fv=s[s.length-1]?s[s.length-1].val:ini, on=SEL===f.id;
+    h+='<div class="fc'+(on?' on':'')+'" style="'+(on?'border-color:'+f.color:'')+(on?';background:#fafffe':'')+'" onclick="selectFund(\''+f.id+'\')">'
+      +'<div class="fc-bk" style="color:'+f.color+'">'+f.label+'</div>'
+      +'<div class="fc-nm">'+f.name+'</div>'
+      +'<div class="fc-rt" style="color:'+f.color+'">'+pc(f.rate)+'</div>'
+      +'<div class="fc-pr">En '+hor+'a: <strong>'+fu(fv)+'</strong></div>'
+      +'<div class="fc-pr" style="margin-top:2px">Mín: '+f.min+'</div>'
+      +'<span class="fc-ri" style="'+( RBKG[f.risk]||'background:#f5f5f3;color:#555')+'">'+f.risk+'</span></div>';
+  });
+  document.getElementById('fund-cards').innerHTML=h;
+}
+
+function selectFund(id){
+  SEL=id;
+  var g=getIn();
+  buildCards(g.ini,g.annC,g.hor,g.rate);
+  buildChart(g.ini,g.annC,g.hor,g.rate);
+  buildTable(g.ini,g.annC,g.hor,g.rate);
+  buildBtns();
+  var t=SEL==='all'?'Crecimiento de tu inversión — Todos los bancos':'Crecimiento de tu inversión — '+(FUNDS.find(function(f){return f.id===SEL})||{label:''}).label;
+  document.getElementById('ch-title').textContent=t;
+}
+
+function setToggle(uc){USE_CUSTOM=uc;buildToggle();var g=getIn();buildChart(g.ini,g.annC,g.hor,g.rate);buildTable(g.ini,g.annC,g.hor,g.rate);}
+function buildToggle(){
+  document.getElementById('tg-real').className='tgb'+(USE_CUSTOM?'':' on');
+  document.getElementById('tg-custom').className='tgb'+(USE_CUSTOM?' on':'');
+  document.getElementById('custom-rate-badge').style.opacity=USE_CUSTOM?'1':'0.45';
+}
+
+function buildChart(ini,annC,hor,cRate){
+  var canvas=document.getElementById('ch1');
+  if(!canvas)return;
+  var wrap=canvas.parentElement;
+  var W=Math.max(wrap.offsetWidth||680,280), H=280;
+  canvas.width=W*devicePixelRatio; canvas.height=H*devicePixelRatio;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  var ctx=canvas.getContext('2d'); ctx.scale(devicePixelRatio,devicePixelRatio);
+  var pl=72,pr=20,pt=14,pb=40,cw=W-pl-pr,ch=H-pt-pb;
+  var maxYr=Math.min(hor,30);
+  var yrs=[];for(var i=0;i<maxYr;i++)yrs.push(i+1);
+
+  var datasets=[];
+  if(SEL==='all'){
+    if(USE_CUSTOM){
+      datasets=[{label:'Tu tasa ('+pc(cRate)+')',color:'#555',dash:[8,4],data:yrs.map(function(y){return sim(ini,cRate,y,annC)[y-1]?sim(ini,cRate,y,annC)[y-1].val:ini}),fundId:null}];
+    } else {
+      datasets=FUNDS.map(function(f){return {label:f.label+' ('+pc(f.rate)+')',color:f.color,dash:null,data:yrs.map(function(y){return sim(ini,f.rate,y,annC)[y-1]?sim(ini,f.rate,y,annC)[y-1].val:ini}),fundId:f.id,fund:f};});
+    }
+  } else {
+    var fund=FUNDS.find(function(f){return f.id===SEL});
+    var rate=USE_CUSTOM?cRate:fund.rate;
+    datasets=[{label:fund.label+' — '+(USE_CUSTOM?'Tu tasa ('+pc(rate)+')':'Tasa real ('+pc(rate)+')'),color:fund.color,dash:null,data:yrs.map(function(y){return sim(ini,rate,y,annC)[y-1]?sim(ini,rate,y,annC)[y-1].val:ini}),fundId:fund.id,fund:fund}];
+  }
+  var cLine={label:'Capital aportado',color:'#ccc',dash:[8,4],data:yrs.map(function(y){return Math.round(ini+annC*y)}),isC:true};
+  datasets.push(cLine);
+
+  var allV=datasets.reduce(function(a,d){return a.concat(d.data)},[]);
+  var maxV=Math.max.apply(null,allV)*1.06||1;
+  function xp(i){return pl+(yrs.length<=1?cw/2:i/(yrs.length-1)*cw)}
+  function yp(v){return pt+ch*(1-Math.min(v,maxV)/maxV)}
+
+  ctx.clearRect(0,0,W,H);
+  for(var gi=0;gi<=4;gi++){
+    var gy=pt+ch/4*gi;
+    ctx.strokeStyle='#f0f0ee';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pl,gy);ctx.lineTo(pl+cw,gy);ctx.stroke();
+    var gv=maxV*(1-gi/4);
+    ctx.fillStyle='#bbb';ctx.font='11px -apple-system,sans-serif';ctx.textAlign='right';
+    ctx.fillText(gv>=1000000?'$'+(gv/1000000).toFixed(1)+'M':gv>=1000?'$'+(gv/1000).toFixed(0)+'K':'$'+Math.round(gv),pl-6,gy+4);
+  }
+  var step=Math.max(1,Math.floor(yrs.length/8));
+  ctx.fillStyle='#bbb';ctx.textAlign='center';
+  yrs.forEach(function(y,i){if(i%step===0||i===yrs.length-1)ctx.fillText('Año '+y,xp(i),H-pb+18);});
+  datasets.forEach(function(d){
+    if(!d.data||!d.data.length)return;
+    ctx.save();ctx.strokeStyle=d.color;ctx.lineWidth=d.isC?1:2.5;
+    if(d.dash)ctx.setLineDash(d.dash);else ctx.setLineDash([]);
+    ctx.beginPath();d.data.forEach(function(v,i){i===0?ctx.moveTo(xp(i),yp(v)):ctx.lineTo(xp(i),yp(v));});
+    ctx.stroke();ctx.restore();
+  });
+
+  var leg=document.getElementById('chart-legend');
+  leg.innerHTML=datasets.map(function(d){
+    var ls=d.dash?'border-top:2px dashed '+d.color+';background:none':'background:'+d.color;
+    return '<span class="li"><span style="width:22px;height:3px;'+ls+';display:inline-block;vertical-align:middle"></span>'+d.label+'</span>';
+  }).join('');
+
+  var tt=document.getElementById('tt1');
+  canvas.onmousemove=function(e){
+    var rect=canvas.getBoundingClientRect(), mx=e.clientX-rect.left;
+    var idx=Math.min(Math.max(0,Math.round((mx-pl)/cw*(yrs.length-1))),yrs.length-1);
+    var yr=yrs[idx], capital=Math.round(ini+annC*yr);
+    var html='<div style="font-weight:700;margin-bottom:7px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.2);padding-bottom:6px">Año '+yr+'</div>';
+    if(SEL==='all'&&!USE_CUSTOM){
+      FUNDS.forEach(function(f){
+        var ds=datasets.find(function(d){return d.fundId===f.id});
+        if(!ds)return;
+        var val=ds.data[idx]||0, interest=val-capital;
+        html+='<div style="margin-bottom:7px;padding-bottom:6px;border-bottom:0.5px solid rgba(255,255,255,.12)">';
+        html+='<div style="color:'+f.color+';font-weight:700;font-size:12px;margin-bottom:3px">'+f.label+' · '+f.name+'</div>';
+        html+='<div style="display:flex;justify-content:space-between;gap:16px;font-size:11px"><span style="color:#aaa">Capital aportado:</span><span>'+fu(capital)+'</span></div>';
+        html+='<div style="display:flex;justify-content:space-between;gap:16px;font-size:11px"><span style="color:#aaa">Intereses ganados:</span><span style="color:'+(interest>=0?'#4ade80':'#f87171')+'">'+(interest>=0?'+':'')+fu(interest)+'</span></div>';
+        html+='<div style="display:flex;justify-content:space-between;gap:16px;font-size:12px;font-weight:600;margin-top:2px"><span>Balance:</span><span style="color:'+f.color+'">'+fu(val)+'</span></div>';
+        html+='</div>';
+      });
+    } else {
+      var mDs=datasets[0], val=mDs?(mDs.data[idx]||0):0, interest=val-capital, ac=mDs?mDs.color:'#1D9E75';
+      html+='<div style="margin-bottom:5px;display:flex;justify-content:space-between;gap:24px"><span style="color:#aaa">Capital aportado:</span><span style="font-weight:600">'+fu(capital)+'</span></div>';
+      html+='<div style="margin-bottom:8px;display:flex;justify-content:space-between;gap:24px"><span style="color:#aaa">Intereses ganados:</span><span style="font-weight:600;color:'+(interest>=0?'#4ade80':'#f87171')+'">'+(interest>=0?'+':'')+fu(interest)+'</span></div>';
+      html+='<div style="border-top:1px solid rgba(255,255,255,.2);padding-top:7px;display:flex;justify-content:space-between;gap:24px"><span style="font-weight:700">Balance final:</span><span style="font-weight:700;font-size:14px;color:'+ac+'">'+fu(val)+'</span></div>';
+    }
+    tt.innerHTML=html; tt.style.display='block';
+    var ttW=SEL==='all'&&!USE_CUSTOM?280:230;
+    tt.style.left=(mx+16+ttW>W?mx-ttW-10:mx+16)+'px';
+    var nC=datasets.filter(function(d){return !d.isC}).map(function(d){return d.data[idx]||0});
+    tt.style.top=Math.max(8,yp(Math.max.apply(null,nC))-30)+'px';
+  };
+  canvas.onmouseleave=function(){tt.style.display='none';};
+}
+
+function buildBtns(){
+  var w=document.getElementById('bank-filter-btns');
+  var h='<button class="bb'+(SEL==='all'?' bba':'')+'" onclick="selectFund(\'all\')">Todos</button>';
+  FUNDS.forEach(function(f){
+    var on=SEL===f.id;
+    h+='<button class="bb'+(on?' bba':'')+'" style="'+(on?'background:'+f.color+';border-color:'+f.color+';color:#fff':'')+'" onclick="selectFund(\''+f.id+'\')">'+f.label+'</button>';
+  });
+  w.innerHTML=h;
+}
+
+function buildTable(ini,annC,hor,cRate){
+  var fund=SEL==='all'?FUNDS[0]:(FUNDS.find(function(f){return f.id===SEL})||FUNDS[0]);
+  var rate=(SEL!=='all'&&USE_CUSTOM)?cRate:fund.rate;
+  var colLbl=SEL==='all'?'BN ETF500 ('+pc(fund.rate)+')':fund.name+' ('+(USE_CUSTOM?'Tu tasa '+pc(rate):pc(rate))+')';
+  document.getElementById('tbl-col-header').textContent=colLbl;
+  document.getElementById('tbl-col-header').style.color=fund.color;
+  var s=sim(ini,rate,Math.min(hor,30),annC);
+  document.getElementById('tbl-body').innerHTML=s.map(function(r,i){
+    var last=i===s.length-1, ic=r.int>=0?'#1D9E75':'#E24B4A';
+    var bg=last?'background:#f5f5f3;font-weight:600':i%2===0?'background:#fafafa':'';
+    return '<tr style="'+bg+'"><td>Año '+r.year+'</td><td style="text-align:right;color:#888">'+fu(r.annC)+'</td><td style="text-align:right;color:#888">'+fu(r.cumC)+'</td><td style="text-align:right;color:'+fund.color+';font-weight:600">'+fu(r.val)+'</td><td style="text-align:right;color:'+ic+';font-weight:600">'+(r.int>=0?'+':'')+fu(r.int)+'</td></tr>';
+  }).join('');
+}
+
+function showTab(n){
+  ['sim','ana'].forEach(function(id,i){
+    document.querySelectorAll('.tab')[i].classList.toggle('active',id===n);
+    document.getElementById('tab-'+id).classList.toggle('active',id===n);
+  });
+  if(n==='sim')setTimeout(run,80);
+}
+
+var rt;
+window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(run,200);});
+window.addEventListener('load',function(){buildToggle();setTimeout(run,120);});
+</script>
+</body>
+</html>
